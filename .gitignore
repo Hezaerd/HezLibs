@@ -46,10 +46,6 @@
 *Thumbs.db
 *.orig
 
-# ======= Package Manager local development artifacts =======
-/Packages/manifest.json
-/Packages/packages-lock.json
-
 # ======= Other =======
 *.moved
 *.db
