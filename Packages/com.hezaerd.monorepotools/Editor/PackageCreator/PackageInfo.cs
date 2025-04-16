@@ -25,6 +25,19 @@ namespace hezaerd.monorepotools.packagecreator
 				packageInfo.displayName = ToProperCase(match.Groups[2].Value);
 			}
 		}
+		
+		public static string GetUnityVersionStr(LTSVersion ltsVersion)
+		{
+			return ltsVersion switch
+			{
+				LTSVersion.NONE => "2023.1",
+				LTSVersion.LTS_2021 => "2021.3",
+				LTSVersion.LTS_2022 => "2022.3",
+				LTSVersion.LTS_2023 => "2023.1",
+				LTSVersion.LTS_6000 => "6000.0",
+				_ => throw new ArgumentOutOfRangeException(nameof(ltsVersion), ltsVersion, null)
+			};
+		}
 
 		private static string ToProperCase(string str)
 		{

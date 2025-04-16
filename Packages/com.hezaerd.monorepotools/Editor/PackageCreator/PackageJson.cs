@@ -26,7 +26,7 @@ namespace hezaerd.monorepotools.packagecreator
 				version = packageInfo.version,
 				displayName = packageInfo.displayName,
 				description = packageInfo.description,
-				unity = Application.unityVersion,
+				unity = PackageInfo.GetUnityVersionStr(packageInfo.ltsVersion),
 				author = packageInfo.author,
 				keywords = new[] { "unity", "package" },
 				license = "MIT"
