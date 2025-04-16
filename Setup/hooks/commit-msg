@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# Get the commit message (first argument is the temporary file containing the message)
+commit_msg_file=$1
+commit_msg=$(cat "$commit_msg_file")
+
+# Valid types according to Conventional Commits
+valid_types="build|chore|ci|docs|feat|fix|refact|revert|test"
+
+# Read valid scopes from scopes.txt
+# Path resolution: from .git/hooks to repository root's Setup/scopes.txt
+scopes_file="$(git rev-parse --show-toplevel)/Setup/scopes.txt"
+# Clean up the scopes: remove empty lines and create pipe-separated list
+valid_scopes=$(grep -v '^[[:space:]]*$' "$scopes_file" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | tr '\n' '|' | sed 's/|$//')
+
+# Extract type and scope from commit message
+if ! type_scope=$(echo "$commit_msg" | grep -E "^($valid_types)\(([^)]+)\): .*" | sed -E "s/^($valid_types)\(([^)]+)\): .*/\1|\2/"); then
+    echo "Error: Commit message format must be: <type>(<scope>): <description>"
+    echo "Valid types are: $valid_types"
+    exit 1
+fi
+
+# Split type and scope
+type=$(echo "$type_scope" | cut -d'|' -f1)
+scope=$(echo "$type_scope" | cut -d'|' -f2)
+
+# Validate type
+if ! echo "$type" | grep -E "^($valid_types)$" > /dev/null; then
+    echo "Error: Invalid type '$type'"
+    echo "Valid types are: $valid_types"
+    exit 1
+fi
+
+# Validate scope
+if ! echo "$scope" | grep -E "^($valid_scopes)$" > /dev/null; then
+    echo "Error: Invalid scope '$scope'"
+    echo "Valid scopes from $scopes_file are:"
+    grep -v '^[[:space:]]*$' "$scopes_file" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sed 's/^/  - /'
+    exit 1
+fi
+
+# If we got here, all validations passed
+exit 0
