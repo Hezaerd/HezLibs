@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using UnityEditor;
+using UnityEditor.Compilation;
 using UnityEngine;
 
 namespace hezaerd.monorepotools.packagecreator
@@ -136,6 +137,7 @@ namespace hezaerd.monorepotools.packagecreator
             CreateAssemblyDefinitions(packageDirectory);
 
             AssetDatabase.Refresh();
+            CompilationPipeline.RequestScriptCompilation();
 
             Debug.Log("Package created successfully at: " + packageDirectory);
         }
