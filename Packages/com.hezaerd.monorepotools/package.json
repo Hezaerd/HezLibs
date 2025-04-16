@@ -1,0 +1,18 @@
+{
+  "name": "com.hezaerd.monorepotools",
+  "version": "0.1.0",
+  "displayName": "Monorepo Tools",
+  "description": "Editor tools for managing a Unity monorepo and creating packages.",
+  "unity": "2022.3",
+  "author": {
+    "name": "Hezaerd",
+    "url": "https://hezaerd.com"
+  },
+  "keywords": [
+    "unity",
+    "editor",
+    "monorepo",
+    "tools"
+  ],
+  "licenseUrl": "https://github.com/Hezaerd/HezLibs/blob/master/LICENSE"
+}
