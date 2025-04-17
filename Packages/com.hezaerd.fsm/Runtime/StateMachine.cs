@@ -14,6 +14,10 @@ namespace hezaerd.fsm
 		/// Event fired when a state transition occurs.
 		/// </summary>
 		public event Action<IState<TOwner>, IState<TOwner>> OnStateChanged;
+
+		public FsmLogType FsmLogType = FsmLogType.ALL;
+		
+		public Action<string, FsmLogType> OnLog;
 		
 		private StateNode _root;
 		private StateNode _current;
@@ -72,6 +76,7 @@ namespace hezaerd.fsm
 			else
 				state = new T();
 
+			Log($"State created: {type.Name}", FsmLogType.STATE_CREATED);
 			RegisterState(state);
 			return state;
 		}
@@ -89,6 +94,7 @@ namespace hezaerd.fsm
 				return (T)node.State;
 
 			T state = factory();
+			Log($"State created: {type.Name}", FsmLogType.STATE_CREATED);
 			RegisterState(state);
 			return state;
 		}
@@ -107,6 +113,7 @@ namespace hezaerd.fsm
 			_stateHistory.Clear();
 			_current = _root;
 			_current.State?.OnEnter(_owner);
+			Log($"State entered: {state.GetType().Name}", FsmLogType.STATE_ENTER);
 		}
 		
 		/// <summary>
@@ -115,13 +122,20 @@ namespace hezaerd.fsm
 		public void ResetToRoot()
 		{
 			if (_root == null)
+			{
+				Log("ResetToRoot called but root is null.", FsmLogType.ERROR);
 				return;
+			}
 
 			_current.State?.OnExit(_owner);
+			Log($"State exited: {_current.State?.GetType().Name}", FsmLogType.STATE_EXIT);
+			
 			_stateHistory.Clear();
 			IState<TOwner> previousState = _current.State;
 			_current = _root;
 			_current.State?.OnEnter(_owner);
+			Log($"State entered: {_current.State?.GetType().Name}", FsmLogType.STATE_ENTER);
+			
 			OnStateChanged?.Invoke(previousState, _current.State);
 		}
 		
@@ -140,10 +154,15 @@ namespace hezaerd.fsm
 			IState<TOwner> nextState = _nodes[state.GetType()].State;
 
 			if (!fromHistory && previousState != null)
+			{
 				_stateHistory.Push(previousState);
+			}
 
 			previousState?.OnExit(_owner);
+			Log($"State exited: {previousState?.GetType().Name}", FsmLogType.STATE_EXIT);
+			
 			nextState?.OnEnter(_owner);
+			Log($"State entered: {nextState?.GetType().Name}", FsmLogType.STATE_ENTER);
 
 			OnStateChanged?.Invoke(previousState, nextState);
 			_current = _nodes[state.GetType()];
@@ -161,7 +180,10 @@ namespace hezaerd.fsm
 		public void GoToPreviousState()
 		{
 			if (_stateHistory.Count == 0)
+			{
+				Log("Unable to go back: no previous state in history.", FsmLogType.ERROR);
 				return;
+			}
 
 			IState<TOwner> previousState = _stateHistory.Pop();
 			ChangeState(previousState, fromHistory: true);
@@ -212,6 +234,7 @@ namespace hezaerd.fsm
 				return;
 
 			_nodes.Add(type, new StateNode(state));
+			Log($"State registered: {type.Name}", FsmLogType.STATE_REGISTERED);
 		}
 		
 		/// <summary>
@@ -223,7 +246,10 @@ namespace hezaerd.fsm
 		public void AddTransition(IState<TOwner> from, IState<TOwner> to, IPredicate condition)
 		{
 			if (!_nodes.ContainsKey(from.GetType()) || !_nodes.ContainsKey(to.GetType()))
+			{
+				Log("AddTransition failed: Both states must be registered before defining a transition.", FsmLogType.ERROR);
 				throw new InvalidOperationException("Both states must be registered before defining a transition.");
+			}
 
 			_nodes[from.GetType()].AddTransition(_nodes[to.GetType()].State, condition);
 		}
@@ -236,7 +262,10 @@ namespace hezaerd.fsm
 		public void AddAnyTransition(IState<TOwner> to, IPredicate condition)
 		{
 			if (!_nodes.ContainsKey(to.GetType()))
+			{
+				Log("AddAnyTransition failed: State must be registered before defining a transition.", FsmLogType.ERROR);
 				throw new InvalidOperationException("State must be registered before defining a transition.");
+			}
 
 			_anyTransitions.Add(new Transition<TOwner>(_nodes[to.GetType()].State, condition));
 		}
@@ -251,7 +280,10 @@ namespace hezaerd.fsm
 		{
 			Type type = state.GetType();
 			if (!_nodes.ContainsKey(type))
+			{
 				_nodes.Add(type, new StateNode(state));
+				Log($"State registered: {type.Name}", FsmLogType.STATE_REGISTERED);
+			}
 
 			return _nodes[type];
 		}
@@ -365,12 +397,19 @@ namespace hezaerd.fsm
 		}
 
         #endregion
+		
+		#region Logging
+		private void Log(string message, FsmLogType type)
+		{
+			if ((FsmLogType & type) != 0)
+				OnLog?.Invoke(message, type);
+		}
+		#endregion
 	}
 	
 	/// <summary>
 	/// Non-generic <see cref="StateMachine{TOwner}"/>
 	/// </summary>
-	/// <inheritdoc cref="StateMachine{TOwner}"/>
 	public class StateMachine : StateMachine<object>
 	{
 		public StateMachine() : base(null) { }
