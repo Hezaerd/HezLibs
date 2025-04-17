@@ -150,17 +150,18 @@ namespace hezaerd.monorepotools.packagecreator
             var testsEditorDirectory = Path.Combine(testsDirectory, "Editor");
             var testsRuntimeDirectory = Path.Combine(testsDirectory, "Runtime");
 
-            var runtimeAsmdefPath = Path.Combine(runtimeDirectory, "Runtime.asmdef");
-            var editorAsmdefPath = Path.Combine(editorDirectory, "Editor.asmdef");
+			// domain.organization.packagenName
+            var runtimeAsmdefPath = Path.Combine(runtimeDirectory, $"{_packageInfo.packageName}.runtime.asmdef");
+            var editorAsmdefPath = Path.Combine(editorDirectory, $"{_packageInfo.packageName}.editor.asmdef");
             var testsEditorAsmdefPath = Path.Combine(testsEditorDirectory,
-                "Editor.asmdef");
+                $"{_packageInfo.packageName}.tests.editor.asmdef");
             var testsRuntimeAsmdefPath = Path.Combine(testsRuntimeDirectory,
-                "Runtime.asmdef");
+                $"{_packageInfo.packageName}.tests.runtime.asmdef");
 
-            var runtimeAsmdefName = _packageInfo.rootNamespace; // Use the provided namespace
-            var editorAsmdefName = _packageInfo.rootNamespace + ".Editor";
-            var testsEditorAsmdefName = _packageInfo.rootNamespace + ".Tests.Editor";
-            var testsRuntimeAsmdefName = _packageInfo.rootNamespace + ".Tests.Runtime";
+            var runtimeAsmdefName = _packageInfo.packageName + ".runtime";
+            var editorAsmdefName = _packageInfo.packageName + ".editor";
+            var testsEditorAsmdefName = _packageInfo.packageName + ".tests.editor";
+            var testsRuntimeAsmdefName = _packageInfo.packageName + ".tests.runtime";
 
             AssemblyDefinition.CreateAssemblyDefinitionFile(runtimeAsmdefPath,
                 runtimeAsmdefName, Array.Empty<string>(), _packageInfo);
