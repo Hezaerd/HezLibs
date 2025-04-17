@@ -21,10 +21,13 @@ namespace hezaerd.fsm
 		private readonly Stack<IState<TOwner>> _stateHistory = new();
 
 		private readonly TOwner _owner;
+
+		private readonly Func<Type, IState<TOwner>> _stateFactory;
 		
-		public StateMachine(TOwner owner)
+		public StateMachine(TOwner owner, Func<Type, IState<TOwner>> customStateFactory = null)
 		{
 			_owner = owner;
+			_stateFactory = customStateFactory;
 		}
 		
 		#region Lifecycle Methods
@@ -48,6 +51,47 @@ namespace hezaerd.fsm
 		{
 			_current.State?.OnFixedUpdate(_owner);
 		}
+		#endregion
+		
+		#region State Factory
+		/// <summary>
+		/// Creates and register a new state of type T.
+		/// </summary>
+		/// <typeparam name="T">The type of state to create.</typeparam>
+		/// <returns>The created state instance.</returns>
+		public T CreateState<T>() where T : IState<TOwner>, new()
+		{
+			Type type = typeof(T);
+			if (_nodes.TryGetValue(type, out StateNode node))
+				return (T)node.State;
+
+			T state;
+			if (_stateFactory != null)
+				state = (T)_stateFactory(type);
+			else
+				state = new T();
+
+			RegisterState(state);
+			return state;
+		}
+		
+		/// <summary>
+		/// Creates and registers a new state using a custom factory function.
+		/// </summary>
+		/// <param name="factory">The factory function to create the state.</param>
+		/// <typeparam name="T">The type of state to create.</typeparam>
+		/// <returns>The created state instance.</returns>
+		public T CreateState<T>(Func<T> factory) where T : IState<TOwner>
+		{
+			Type type = typeof(T);
+			if (_nodes.TryGetValue(type, out StateNode node))
+				return (T)node.State;
+
+			T state = factory();
+			RegisterState(state);
+			return state;
+		}
+		
 		#endregion
 		
 		#region State Management
@@ -160,7 +204,7 @@ namespace hezaerd.fsm
 		/// All states should be registered before setting the root state or adding transitions.
 		/// </summary>
 		/// <param name="state">The state to register.</param>
-		public void RegisterState(IState<TOwner> state)
+		private void RegisterState(IState<TOwner> state)
 		{
 			Type type = state.GetType();
 			if (_nodes.ContainsKey(type))
