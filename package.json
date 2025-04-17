@@ -5,7 +5,8 @@
   "scripts": {
     "setup": "node ./setup/setup.js",
     "install-hooks": "node ./setup/install-hooks.js",
-    "postinstall": "npm run setup"
+    "postinstall": "npm run setup",
+    "dev-doc": "cd docs-site && npm run dev"
   },
   "keywords": [
     "monorepo",
