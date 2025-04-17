@@ -1,0 +1,16 @@
+{
+    "name": "com.hezaerd.signals.tests.runtime",
+    "rootNamespace": "hezaerd.signals",
+    "references": [
+        "com.hezaerd.signals.runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

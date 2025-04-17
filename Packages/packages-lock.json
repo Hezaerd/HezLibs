@@ -12,6 +12,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "com.hezaerd.signals": {
+      "version": "file:com.hezaerd.signals",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.unity.ext.nunit": {
       "version": "2.0.5",
       "depth": 1,
