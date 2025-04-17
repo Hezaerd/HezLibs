@@ -4,22 +4,29 @@ using System.Collections.Generic;
 namespace hezaerd.fsm
 {
 	/// <summary>
-	/// A state machine which supports transitions, "any" transitions, root state
+	/// A generic state machine which supports transitions, "any" transitions, root state
 	/// resetting, and backward navigation via history.
 	/// </summary>
-	public class StateMachine
+	public class StateMachine<TOwner>
 	{
 		/// <summary>
 		/// Event fired when a state transition occurs.
 		/// </summary>
-		public event Action<IState, IState> OnStateChanged;
+		public event Action<IState<TOwner>, IState<TOwner>> OnStateChanged;
 
 		private StateNode _root;
 		private StateNode _current;
-		private readonly Dictionary<Type, StateNode> _nodes = new Dictionary<Type, StateNode>();
-		private readonly HashSet<ITransition> _anyTransitions = new HashSet<ITransition>();
-		private readonly Stack<IState> _stateHistory = new Stack<IState>();
+		private readonly Dictionary<Type, StateNode> _nodes = new();
+		private readonly HashSet<ITransition<TOwner>> _anyTransitions = new();
+		private readonly Stack<IState<TOwner>> _stateHistory = new();
 
+		private readonly TOwner _owner;
+		
+		public StateMachine(TOwner owner)
+		{
+			_owner = owner;
+		}
+		
 		#region Lifecycle Methods
 		
 		/// <summary>
@@ -27,11 +34,11 @@ namespace hezaerd.fsm
 		/// </summary>
 		public void Update()
 		{
-			ITransition transition = GetTransition();
+			ITransition<TOwner> transition = GetTransition();
 			if (transition != null)
 				ChangeState(transition.TargetState);
 			
-			_current.State?.OnUpdate();
+			_current.State?.OnUpdate(_owner);
 		}
 		
 		/// <summary>
@@ -39,7 +46,7 @@ namespace hezaerd.fsm
 		/// </summary>
 		public void FixedUpdate()
 		{
-			_current.State?.OnFixedUpdate();
+			_current.State?.OnFixedUpdate(_owner);
 		}
 		#endregion
 		
@@ -49,12 +56,12 @@ namespace hezaerd.fsm
 		/// Sets the root state of the state machine.
 		/// The root becomes the base state for history.
 		/// </summary>
-		public void SetRoot(IState state)
+		public void SetRoot(IState<TOwner> state)
 		{
 			_root = GetOrCreateNode(state);
 			_stateHistory.Clear();
 			_current = _root;
-			_current.State?.OnEnter();
+			_current.State?.OnEnter(_owner);
 		}
 		
 		/// <summary>
@@ -65,11 +72,11 @@ namespace hezaerd.fsm
 			if (_root == null)
 				return;
 
-			_current.State?.OnExit();
+			_current.State?.OnExit(_owner);
 			_stateHistory.Clear();
-			IState previousState = _current.State;
+			IState<TOwner> previousState = _current.State;
 			_current = _root;
-			_current.State?.OnEnter();
+			_current.State?.OnEnter(_owner);
 			OnStateChanged?.Invoke(previousState, _current.State);
 		}
 		
@@ -79,20 +86,19 @@ namespace hezaerd.fsm
 		/// </summary>
 		/// <param name="state">The target state.</param>
 		/// <param name="fromHistory">Indicates whether the state change is a backward (history) transition.</param>
-		private void ChangeState(IState state, bool fromHistory = false)
+		private void ChangeState(IState<TOwner> state, bool fromHistory = false)
 		{
 			if (state == _current.State)
 				return;
 
-			IState previousState = _current.State;
-			IState nextState = _nodes[state.GetType()].State;
+			IState<TOwner> previousState = _current.State;
+			IState<TOwner> nextState = _nodes[state.GetType()].State;
 
-			// Only push onto history if not a backward transition
 			if (!fromHistory && previousState != null)
 				_stateHistory.Push(previousState);
 
-			previousState?.OnExit();
-			nextState?.OnEnter();
+			previousState?.OnExit(_owner);
+			nextState?.OnEnter(_owner);
 
 			OnStateChanged?.Invoke(previousState, nextState);
 			_current = _nodes[state.GetType()];
@@ -112,7 +118,7 @@ namespace hezaerd.fsm
 			if (_stateHistory.Count == 0)
 				return;
 
-			IState previousState = _stateHistory.Pop();
+			IState<TOwner> previousState = _stateHistory.Pop();
 			ChangeState(previousState, fromHistory: true);
 		}
 
@@ -121,7 +127,7 @@ namespace hezaerd.fsm
 		/// </summary>
 		/// <typeparam name="T">The state type to test against.</typeparam>
 		/// <returns>True if current state is of type T; otherwise false.</returns>
-		public bool IsInState<T>() where T : IState => _current.State is T;
+		public bool IsInState<T>() where T : IState<TOwner> => _current.State is T;
 
 		/// <summary>
 		/// Retrieves the full route of states from the root to the current state,
@@ -132,19 +138,13 @@ namespace hezaerd.fsm
 		/// followed by the states in the transition history in order,
 		/// ending with the current state.
 		/// </returns>
-		public List<IState> GetFullStateRoute()
+		public List<IState<TOwner>> GetFullStateRoute()
 		{
-			var route = new List<IState>();
-			
-			// if (_root != null)
-			// 	route.Add(_root.State);
-			
-			// Reverse the history stack to get the correct order
+			var route = new List<IState<TOwner>>();
 			var historyArray = _stateHistory.ToArray();
 			Array.Reverse(historyArray);
 			route.AddRange(historyArray);
-			
-			// Append the current state if it's not already the last one.
+
 			if (route.Count == 0 || route[^1] != _current.State)
 				route.Add(_current.State);
 
@@ -160,7 +160,7 @@ namespace hezaerd.fsm
 		/// All states should be registered before setting the root state or adding transitions.
 		/// </summary>
 		/// <param name="state">The state to register.</param>
-		public void RegisterState(IState state)
+		public void RegisterState(IState<TOwner> state)
 		{
 			Type type = state.GetType();
 			if (_nodes.ContainsKey(type))
@@ -175,7 +175,7 @@ namespace hezaerd.fsm
 		/// <param name="from">The originating state.</param>
 		/// <param name="to">The target state.</param>
 		/// <param name="condition">The condition that must be met for the transition to occur.</param>
-		public void AddTransition(IState from, IState to, IPredicate condition)
+		public void AddTransition(IState<TOwner> from, IState<TOwner> to, IPredicate condition)
 		{
 			if (!_nodes.ContainsKey(from.GetType()) || !_nodes.ContainsKey(to.GetType()))
 				throw new InvalidOperationException("Both states must be registered before defining a transition.");
@@ -188,12 +188,12 @@ namespace hezaerd.fsm
 		/// </summary>
 		/// <param name="to">The target state.</param>
 		/// <param name="condition">The condition that must be met for the transition to occur.</param>
-		public void AddAnyTransition(IState to, IPredicate condition)
+		public void AddAnyTransition(IState<TOwner> to, IPredicate condition)
 		{
 			if (!_nodes.ContainsKey(to.GetType()))
 				throw new InvalidOperationException("State must be registered before defining a transition.");
 
-			_anyTransitions.Add(new Transition(_nodes[to.GetType()].State, condition));
+			_anyTransitions.Add(new Transition<TOwner>(_nodes[to.GetType()].State, condition));
 		}
 
 		/// <summary>
@@ -202,7 +202,7 @@ namespace hezaerd.fsm
 		/// </summary>
 		/// <param name="state">The state instance.</param>
 		/// <returns>The corresponding state node.</returns>
-		private StateNode GetOrCreateNode(IState state)
+		private StateNode GetOrCreateNode(IState<TOwner> state)
 		{
 			Type type = state.GetType();
 			if (!_nodes.ContainsKey(type))
@@ -216,15 +216,15 @@ namespace hezaerd.fsm
 		/// First checks transitions registered on the current state then any-transitions.
 		/// </summary>
 		/// <returns>An ITransition if a valid transition is found; otherwise null.</returns>
-		private ITransition GetTransition()
+		private ITransition<TOwner> GetTransition()
 		{
-			foreach (ITransition transition in _current.Transitions)
+			foreach (var transition in _current.Transitions)
 			{
 				if (transition.Condition.Evaluate())
 					return transition;
 			}
 
-			foreach (ITransition transition in _anyTransitions)
+			foreach (var transition in _anyTransitions)
 			{
 				if (transition.Condition.Evaluate())
 					return transition;
@@ -246,17 +246,17 @@ namespace hezaerd.fsm
 			/// <summary>
 			/// The state represented by this node.
 			/// </summary>
-			public IState State { get; }
+			public IState<TOwner> State { get; }
 
 			/// <summary>
 			/// The transitions originating from this state.
 			/// </summary>
-			public HashSet<ITransition> Transitions { get; }
+			public HashSet<ITransition<TOwner>> Transitions { get; }
 
-			public StateNode(IState state)
+			public StateNode(IState<TOwner> state)
 			{
 				State = state;
-				Transitions = new HashSet<ITransition>();
+				Transitions = new HashSet<ITransition<TOwner>>();
 			}
 
 			/// <summary>
@@ -264,12 +264,21 @@ namespace hezaerd.fsm
 			/// </summary>
 			/// <param name="targetState">The target state.</param>
 			/// <param name="condition">The condition required for this transition.</param>
-			public void AddTransition(IState targetState, IPredicate condition)
+			public void AddTransition(IState<TOwner> targetState, IPredicate condition)
 			{
-				Transitions.Add(new Transition(targetState, condition));
+				Transitions.Add(new Transition<TOwner>(targetState, condition));
 			}
 		}
 
         #endregion
+	}
+	
+	/// <summary>
+	/// Non-generic <see cref="StateMachine{TOwner}"/>
+	/// </summary>
+	/// <inheritdoc cref="StateMachine{TOwner}"/>
+	public class StateMachine : StateMachine<object>
+	{
+		public StateMachine() : base(null) { }
 	}
 }
