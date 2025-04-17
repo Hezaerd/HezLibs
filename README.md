@@ -1,4 +1,17 @@
-## Setup
+## Available packages
+
+- [FSM](Packages/com.hezaerd.fsm/README.md)
+- [Monorepo Tools](Packages/com.hezaerd.monorepotools/README.md)
+
+## How to install a package
+
+To install this package via Unity Package Manager:
+1. Open **Window > Package Manager**.
+2. Click **+** > **Add package from git URL...**.
+3. Enter `https://github.com/Hezaerd/HezLibs.git?path=Packages/com.hezaerd.<package_name>`.
+
+
+## Work on HezLibs
 
 To set up the development environment, run the following steps:
 
