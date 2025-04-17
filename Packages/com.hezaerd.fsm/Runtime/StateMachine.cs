@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace hezaerd.fsm
 {
@@ -13,7 +14,7 @@ namespace hezaerd.fsm
 		/// Event fired when a state transition occurs.
 		/// </summary>
 		public event Action<IState<TOwner>, IState<TOwner>> OnStateChanged;
-
+		
 		private StateNode _root;
 		private StateNode _current;
 		private readonly Dictionary<Type, StateNode> _nodes = new();
@@ -277,6 +278,55 @@ namespace hezaerd.fsm
 			return null;
 		}
 		
+		#endregion
+		
+		#region Serialization Hooks
+		/// <summary>
+		/// Gets the current state's unique identifier (type name).
+		/// </summary>
+		public string CurrentStateId => _current?.State?.GetType().AssemblyQualifiedName;
+		
+		/// <summary>
+		/// Gets the state history as a list of unique identifiers (type names).
+		/// </summary>
+		public List<string> StateHistoryIds => _stateHistory.Select(s => s.GetType().AssemblyQualifiedName).ToList();
+		
+		/// <summary>
+		/// Gets all registered states
+		/// </summary>
+		/// <returns></returns>
+		public IEnumerable<IState<TOwner>> GetAllStates()
+		{
+			return _nodes.Values.Select(n => n.State);
+		}
+		
+		/// <summary>
+		/// Restores the current state by its unique identifier.
+		/// </summary>
+		/// <param name="id">The unique identifier (type name) of the state.</param>
+		public void SetCurrentStateById(string id)
+		{
+			if (string.IsNullOrEmpty(id)) 
+				return;
+			Type type = Type.GetType(id);
+			if (type != null && _nodes.TryGetValue(type, out var node))
+				_current = node;
+		}
+
+		/// <summary>
+		/// Restores the state history by a list of unique identifiers.
+		/// </summary>
+		/// <param name="ids">The list of unique identifiers (type names) of the states.</param>
+		public void SetStateHistoryByIds(IEnumerable<string> ids)
+		{
+			_stateHistory.Clear();
+			foreach (var id in ids)
+			{
+				Type type = Type.GetType(id);
+				if (type != null && _nodes.TryGetValue(type, out var node))
+					_stateHistory.Push(node.State);
+			}
+		}
 		#endregion
 
 		#region Private State Node Class

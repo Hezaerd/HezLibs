@@ -20,4 +20,10 @@ namespace hezaerd.fsm
 		void OnUpdate();
 		void OnFixedUpdate();
 	}
+
+	public interface IStateSerializable
+	{
+		object SaveStateData();
+		void LoadStateData(object data);
+	}
 }
