@@ -1,2 +1,3 @@
-monorepotools
 global
+monorepotools
+fsm

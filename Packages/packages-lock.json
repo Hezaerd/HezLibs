@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.hezaerd.fsm": {
+      "version": "file:com.hezaerd.fsm",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "com.hezaerd.monorepotools": {
       "version": "file:com.hezaerd.monorepotools",
       "depth": 0,

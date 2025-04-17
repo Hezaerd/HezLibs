@@ -1,0 +1,18 @@
+{
+    "name": "com.hezaerd.fsm",
+    "version": "1.0.0",
+    "displayName": "FSM",
+    "description": "Generic Finite State Machine with backward navigation.",
+    "unity": "2021.3",
+    "author": {
+        "name": "Hezaerd",
+        "url": "https://hezaerd.com"
+    },
+    "keywords": [
+        "unity",
+        "package",
+        "fsm",
+        "finite state machine"
+    ],
+    "license": "MIT"
+}

@@ -1,0 +1,14 @@
+{
+    "name": "com.hezaerd.fsm.runtime",
+    "rootNamespace": "hezaerd.fsm",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
