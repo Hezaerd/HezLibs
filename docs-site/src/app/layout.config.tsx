@@ -1,4 +1,9 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
+import { Avatar, AvatarImage } from '@/components/ui/avatar';
+import {
+    Group,
+    PackageOpen,
+  } from 'lucide-react';
 
 /**
  * Shared layout configurations
@@ -8,26 +13,42 @@ import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
  * Docs Layout: app/docs/layout.tsx
  */
 export const baseOptions: BaseLayoutProps = {
+  githubUrl: 'https://github.com/hezaerd/hezlibs',
   nav: {
     title: (
       <>
-        <svg
-          width="24"
-          height="24"
-          xmlns="http://www.w3.org/2000/svg"
-          aria-label="Logo"
-        >
-          <circle cx={12} cy={12} r={12} fill="currentColor" />
-        </svg>
-        My App
+        <Avatar className="w-8 h-8">
+          <AvatarImage className="w-8 h-8" src="https://github.com/hezaerd.png" />
+        </Avatar>
+        HezLibs
       </>
     ),
   },
   links: [
     {
+      type: 'menu',
       text: 'Documentation',
-      url: '/docs',
-      active: 'nested-url',
+      url: '/docs/fsm',
+      items: [
+          {
+            icon: <Group />,
+            text: 'FSM',
+            description: 'Powerful finite state machine implementation',
+            url: '/docs/fsm',
+            menu: {
+              className: 'lg:col-start-1',
+            },
+          },
+        {
+          icon: <PackageOpen />,
+          text: 'Monorepo Tools',
+          description: 'Manage your Unity packages monorepo',
+          url: '/docs/monorepotools',
+          menu: {
+            className: 'lg:col-start-2',
+          },
+        }
+      ],
     },
   ],
 };
