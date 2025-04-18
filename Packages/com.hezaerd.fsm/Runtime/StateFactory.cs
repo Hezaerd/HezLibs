@@ -8,7 +8,6 @@ namespace hezaerd.fsm
 	}
 	
 	public class DefaultStateFactory : IStateFactory
-	
 	{
 		public T Create<T>(params object[] args) where T : IState
 		{

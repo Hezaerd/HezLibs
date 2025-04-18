@@ -1,0 +1,16 @@
+{
+    "name": "Sandbox",
+    "rootNamespace": "sandbox",
+    "references": [
+        "GUID:861a5158beec5fc4da968c6b00b97cd9"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
