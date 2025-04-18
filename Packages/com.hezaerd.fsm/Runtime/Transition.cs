@@ -1,17 +1,17 @@
 namespace hezaerd.fsm
 {
-	public interface ITransition<in TOwner>
+	public interface ITransition
 	{
-		IState<TOwner> TargetState { get; }
+		IState TargetState { get; }
 		IPredicate Condition { get; }
 	}
 	
-	public class Transition<TOwner> : ITransition<TOwner>
+	public class Transition : ITransition
 	{
-		public IState<TOwner> TargetState { get; }
+		public IState TargetState { get; }
 		public IPredicate Condition { get; }
 		
-		public Transition(IState<TOwner> targetState, IPredicate condition)
+		public Transition(IState targetState, IPredicate condition)
 		{
 			TargetState = targetState;
 			Condition = condition;
