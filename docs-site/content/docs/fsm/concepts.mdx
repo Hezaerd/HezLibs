@@ -1,0 +1,45 @@
+---
+title: Core Concepts
+description: Understanding the fundamental concepts of the StateMachine.
+---
+
+import { Card, Cards } from 'fumadocs-ui/components/card';
+
+# Core Concepts
+
+<Cards>
+  <Card title="IState<TOwner>" description="Encapsulates logic for a single state. Implements OnEnter, OnExit, OnUpdate, and OnFixedUpdate." />
+  <Card title="IPredicate" description="A condition interface for transitions. Returns true if a transition should occur." />
+  <Card title="ITransition<TOwner>" description="Defines a target state and a condition for transitions." />
+  <Card title="StateMachine<TOwner>" description="Manages states, transitions, history, and owner context." />
+</Cards>
+
+## IState\<TOwner>
+
+A **state** is a class implementing `IState<TOwner>`.
+It defines:
+
+- `OnEnter(TOwner owner)`: Called when entering the state.
+- `OnExit(TOwner owner)`: Called when leaving the state.
+- `OnUpdate(TOwner owner)`: Called every update/tick.
+- `OnFixedUpdate(TOwner owner)`: Called every fixed update (optional).
+
+## IPredicate
+
+A **predicate** is a condition object implementing `IPredicate` with a single method:
+
+- `bool Evaluate()`: Returns true if the transition should occur.
+
+## ITransition\<TOwner>
+
+A **transition** links a source state to a target state, with a condition:
+
+- `IState<TOwner> TargetState`
+- `IPredicate Condition`
+
+## StateMachine\<TOwner>
+
+The **StateMachine** is the core class.
+- Generic over an `owner` type (e.g., your player, AI, etc).
+- Manages state registration, transitions, "any" transitions, history, and state changes.
+- Not tied to Unity or MonoBehaviour.

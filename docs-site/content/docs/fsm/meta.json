@@ -6,15 +6,9 @@
     "pages": [
         "---Introduction---",
         "index",
-        "finite-state-machine",
-        "---Setup---",
-        "installation",
-        "---Basics---",
+        "concepts",
+        "---Usage---",
         "basic-usage",
-        "---Advanced---",
-        "state-history",
-        "events",
-        "state-factory",
-        "serialization"
+        "advanced-usage"
     ]
 }

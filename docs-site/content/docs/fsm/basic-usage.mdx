@@ -1,6 +1,181 @@
 ---
 title: Basic Usage
-description: Learn how to use FSM
+description: Learn how to use the StateMachine in your projects.
 ---
 
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+import { File, Folder, Files } from 'fumadocs-ui/components/files';
+
 ## Basic Usage
+
+For simplicity, we will use <span className="underline font-bold">Unity</span>
+to demonstrate the basic usage of the StateMachine.
+
+This section demonstrates how to create and use a simple state machine.
+
+We will create a simple state machine for a player character.
+
+<Steps>
+
+    <Step>
+        ## Create Your Custom State
+
+        Create a custom abstract class that implements `IState`.
+        We will use Dependency Injection to inject the player into states.
+
+        ```csharp title="PlayerState.cs"
+        using hezaerd.fsm;
+
+        public abstract class PlayerState : IState
+        {
+            protected Player Player;
+
+            public BasePlayerState(Player player) { Player = player; }
+
+            public virtual void OnEnter() { }
+            public virtual void OnExit() { }
+            public virtual void OnUpdate() { }
+        }
+        ```
+    </Step>
+
+    <Step>
+        ## Define Your States
+
+        Now you can create your states by inheriting from your `PlayerState` class.
+
+        ```csharp title="IdleState.cs"
+        using UnityEngine;
+
+        public class IdleState : PlayerState
+        {
+            public IdleState(Player player) : base(player) { }
+
+            public override void OnEnter() => Debug.Log("Enter Idle");
+            public override void OnExit() => Debug.Log("Exit Idle");
+            public override void OnUpdate() => Debug.Log("Idling");
+        }
+        ```
+
+        ```csharp title="WalkState.cs"
+        using UnityEngine;
+
+        public class WalkState : PlayerState
+        {
+            public WalkState(Player player) : base(player) { }
+
+            public override void OnEnter() => Debug.Log("Enter Walk");
+            public override void OnExit() => Debug.Log("Exit Walk");
+            public override void OnUpdate() => Debug.Log("Walking");
+        }
+        ```
+
+        _It is recommended to create a folder for your states and put all your states in there._
+
+        <Files>
+            <Folder name="Player" defaultOpen>
+                <Folder name="States" defaultOpen>
+                    <File name="PlayerState.cs" />
+                    <File name="IdleState.cs" />
+                    <File name="WalkState.cs" />
+                </Folder>
+                <File name="Player.cs" />
+            </Folder>
+        </Files>
+
+    </Step>
+
+    <Step>
+        ## Create Your State Machine
+
+        Now you can add your state machine to your player class.
+
+        ```csharp title="Player.cs"
+        public class Player : MonoBehaviour
+        {
+            private StateMachine _fsm;
+
+            private void Awake()
+            {
+                _fsm = new StateMachine();
+            }
+
+            // VERRY IMPORTANT!: allow to transition between states
+            private void Update()
+            {
+                _fsm.Update();
+            }
+        }
+        ```
+    </Step>
+
+    <Step>
+        ## Register Your States
+
+        Now you can register your states to the state machine.
+
+        ```csharp title="Player.cs"
+        private void Awake()
+        {
+            _fsm = new StateMachine();
+
+            // Create and register your states
+            var idleState = _fsm.CreateState<IdleState>(this); // <- Inject the player instance
+            var walkState = _fsm.CreateState<WalkState>(this);
+
+            _fsm.SetRoot(idleState);
+        }
+        ```
+    </Step>
+
+    <Step>
+        ## Create Your Predicates
+
+        To determine when transitions should happen, we need `IPredicate` instances. The library provides a convenient helper called `FuncPredicate` for this purpose.
+
+        Let's create predicates for transitioning between `Idle` and `Walk` states based on the `W` key:
+
+        ```csharp title="Player.cs"
+        using UnityEngine;
+        using hezaerd.fsm;
+
+        public class Player : MonoBehaviour
+        {
+            private FuncPredicate IdlePredicate => new FuncPredicate(() => Input.GetKeyUp(KeyCode.W));
+            private FuncPredicate WalkPredicate => new FuncPredicate(() => Input.GetKeyDown(KeyCode.W));
+        }
+        ```
+    </Step>
+
+    <Step>
+        ## Add Transitions to Your State Machine
+
+        Now that we have our predicates, we can use them to define the transitions between states:
+
+        ```csharp title="Player.cs"
+        private void Awake()
+        {
+            /* Existing code... */
+
+            // Add transitions between states using the predicates
+            _fsm.AddTransition(idleState, walkState, WalkPredicate);
+            _fsm.AddTransition(walkState, idleState, IdlePredicate);
+
+            _fsm.SetRoot(idleState);
+        }
+        ```
+    </Step>
+</Steps>
+
+## Next Steps
+
+Congratulations! You've learned how to set up and use a basic state machine for your player character.
+This fondation allows you to manager compelxe behaviour in a clean and maintainable way.
+
+- Try adding more states and transitions to handle additional actions.
+- Explore advanced features such as `AnyTransition` or custom `IStateFactory`.
+- Check out the [Advanced Usage](/docs/fsm/advanced-usage) guide for more powerful patterns.
+- Refer to the [API Reference](/docs/fsm/api-reference) for more detailed documentation.
+
+If you have questions or want to share your experience, join our ~~community discussions discord server~~ or
+check the [FAQ](/docs/fsm/faq) for answers to common questions.
