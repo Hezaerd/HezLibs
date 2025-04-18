@@ -1,0 +1,52 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+# Unity Packages Documentation Generation Rule
+
+This rule describes how to generate and organize documentation for Unity Engine packages in this monorepo, using Fumadocs and NextJS 15.
+
+## Locations
+- **Packages**: All Unity packages are located in the [`Packages`](mdc:../../Packages) directory. Each package is in its own subfolder (e.g., [`com.hezaerd.fsm`](mdc:../../Packages/com.hezaerd.fsm)).
+- **Documentation Site**: The documentation site is located in [`docs-site`](mdc:..). The main documentation content is under [`content/docs`](mdc:../content/docs).
+
+## For Each Package
+1. **Create a Documentation Folder**
+   - For each package (e.g., `com.hezaerd.fsm`), create a folder in [`content/docs`](mdc:../content/docs) named after the package (e.g., `fsm`, `signals`, `monorepotools`).
+
+2. **Add Metadata**
+   - In the package's docs folder, add a `meta.json` file with the following structure:
+     ```json
+     {
+       "root": true,
+       "title": "<Display Name>",
+       "description": "<Short Description>",
+       "icon": "<IconName>"
+     }
+     ```
+   - Use values from the package's `package.json` for `title` (from `displayName`) and `description`.
+   - Choose an appropriate icon name for the `icon` field (e.g., `Terminal`, `Signal`).
+
+3. **Add Main Documentation Page**
+   - Add an `index.mdx` file in the same folder. Use frontmatter for the title and description:
+     ```mdx
+     ---
+     title: <Display Name>
+     description: <Short Description>
+     ---
+     ```
+   - You can include content from the package's `README.md` as the initial documentation body.
+
+4. **Update Navigation**
+   - Add the package folder name to the `pages` array in [`content/docs/meta.json`](mdc:../content/docs/meta.json) to include it in the sidebar navigation.
+
+## Example
+For the package `com.hezaerd.fsm`:
+- [`Packages/com.hezaerd.fsm/package.json`](mdc:../../Packages/com.hezaerd.fsm/package.json)
+- [`docs-site/content/docs/fsm/meta.json`](mdc:../content/docs/fsm/meta.json)
+- [`docs-site/content/docs/fsm/index.mdx`](mdc:../content/docs/fsm/index.mdx)
+
+## Notes
+- The documentation site uses Fumadocs and NextJS 15. See [`docs-site/README.md`](mdc:../README.md) for more details.
+- You can automate documentation generation by extracting metadata and README content from each package.

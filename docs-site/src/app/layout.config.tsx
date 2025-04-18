@@ -1,25 +1,21 @@
 import type { BaseLayoutProps } from 'fumadocs-ui/layouts/shared';
 import { Avatar, AvatarImage } from '@/components/ui/avatar';
-import {
-    Group,
-    PackageOpen,
-  } from 'lucide-react';
+import { Group, PackageOpen, Signal } from 'lucide-react';
 
-/**
- * Shared layout configurations
- *
- * you can customise layouts individually from:
- * Home Layout: app/(home)/layout.tsx
- * Docs Layout: app/docs/layout.tsx
- */
+export const logo = (
+  <>
+    <Avatar className="md:w-8 md:h-8 w-6 h-6">
+      <AvatarImage className="md:w-8 md:h-8 w-6 h-6" src="https://github.com/hezaerd.png" />
+    </Avatar>
+  </>
+);
+
 export const baseOptions: BaseLayoutProps = {
   githubUrl: 'https://github.com/hezaerd/hezlibs',
   nav: {
     title: (
       <>
-        <Avatar className="w-8 h-8">
-          <AvatarImage className="w-8 h-8" src="https://github.com/hezaerd.png" />
-        </Avatar>
+        {logo}
         HezLibs
       </>
     ),
@@ -28,24 +24,33 @@ export const baseOptions: BaseLayoutProps = {
     {
       type: 'menu',
       text: 'Documentation',
-      url: '/docs/fsm',
+      url: '/docs',
       items: [
-          {
-            icon: <Group />,
-            text: 'FSM',
-            description: 'Powerful finite state machine implementation',
-            url: '/docs/fsm',
-            menu: {
-              className: 'lg:col-start-1',
-            },
+        {
+          icon: <Group />,
+          text: 'FSM',
+          description: 'Powerful finite state machine implementation',
+          url: '/docs/fsm',
+          menu: {
+            className: 'lg:col-start-1',
           },
+        },
+        {
+          icon: <Signal />,
+          text: 'Signals',
+          description: 'Signals',
+          url: '/docs/signals',
+          menu: {
+            className: 'lg:col-start-1',
+          },
+        },
         {
           icon: <PackageOpen />,
           text: 'Monorepo Tools',
-          description: 'Manage your Unity packages monorepo',
+          description: 'Collection of tools to manage your Unity package monorepo',
           url: '/docs/monorepotools',
           menu: {
-            className: 'lg:col-start-2',
+            className: 'lg:col-start-2 lg:row-start-1',
           },
         }
       ],

@@ -1,6 +1,20 @@
 {
-    "root": true,
     "title": "FSM",
-    "description": "Finite State Machine",
-    "icon": "Terminal"
+    "description": "Learn about the Finite State Machine",
+    "icon": "Group",
+    "root": true,
+    "pages": [
+        "---Introduction---",
+        "index",
+        "finite-state-machine",
+        "---Setup---",
+        "installation",
+        "---Basics---",
+        "basic-usage",
+        "---Advanced---",
+        "state-history",
+        "events",
+        "state-factory",
+        "serialization"
+    ]
 }

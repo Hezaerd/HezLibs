@@ -1,6 +1,6 @@
 {
     "root": true,
     "title": "Monorepo Tools",
-    "description": "Manage your Unity package monorepo",
+    "description": "Tools to manage your Unity package monorepo",
     "icon": "Terminal"
 }
